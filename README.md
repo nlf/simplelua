@@ -18,7 +18,8 @@ client.js
 // it specifies what directory contains your lua scripts
 // all other parameters are identical to the node_redis module
 
-var client = require('simplelua').createClient(6379, '127.0.0.1', { scriptPath: './lua' });
+var simplelua = require('simplelua');
+var client = simplelua.createClient(6379, '127.0.0.1', { scriptPath: './lua' });
 
 // since we loaded the file print.lua, we now have client.print available
 client.print('testing', function (err, reply) {
