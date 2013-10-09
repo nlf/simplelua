@@ -6,15 +6,13 @@ This module was written to provide a very simple wrapper for the redis library t
 Usage
 -----
 
-    ./lua/print.lua
-
+./lua/print.lua
 ```lua
 -- all arguments passed to the function will be in the ARGV table, in order
 return ARGV[1]
 ```
 
-    client.js
-
+client.js
 ```js
 // the scriptPath option is optional and defaults to './lua'
 // it specifies what directory contains your lua scripts
