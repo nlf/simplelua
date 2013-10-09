@@ -6,7 +6,7 @@ This module was written to provide a very simple wrapper for the redis library t
 Usage
 -----
 
-```./lua/print.lua```
+    ./lua/print.lua
 
 ```lua
 -- all arguments passed to the function will be in the ARGV table, in order
