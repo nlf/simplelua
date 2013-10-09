@@ -1,0 +1,18 @@
+{
+  "name": "simplelua",
+  "version": "0.0.1",
+  "description": "a wrapper for redis to provide simple lua script usage",
+  "main": "index.js",
+  "keywords": [
+    "redis",
+    "lua"
+  ],
+  "author": "Nathan LaFreniere <quitlahok@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "redis": "~0.8.6"
+  },
+  "devDependencies": {
+    "precommit-hook": "~0.3.8"
+  }
+}
