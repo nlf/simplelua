@@ -22,10 +22,11 @@ function SimpleRedis(client, options) {
             SimpleRedis.prototype[name] = (function (name, script) {
                 return function () {
                     var args = Array.prototype.slice.call(arguments);
+                    args = [script, 0].concat(args);
                     var callback;
 
                     if (typeof args[args.length - 1] === 'function') callback = args.pop();
-                    return self.eval(script, 0, args, callback);
+                    return self.eval(args, callback);
                 };
             })(name, fs.readFileSync(path.join(scriptPath, files[i]), 'utf8'));
         }
