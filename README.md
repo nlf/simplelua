@@ -13,7 +13,7 @@ Usage
 return ARGV[1]
 ```
 
-```client.js```
+    client.js
 
 ```js
 // the scriptPath option is optional and defaults to './lua'
