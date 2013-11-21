@@ -27,6 +27,33 @@ client.print('testing', function (err, reply) {
 });
 ```
 
+SimpleLua supports nested directories, as well as directory/function clashes so:
+
+```
+test/lua
+├── basic.lua
+├── company
+│   └── create.lua
+├── company.lua
+└── user
+    ├── create.lua
+        └── nested
+                └── mofn.lua
+```
+
+will have the functions:
+
+```
+client.basic(...)
+client.company(...)
+client.company.create(...)
+client.user(...)
+client.user.create(...)
+client.user.nested.mofn(...)
+```
+
+
+
 Security Considerations
 -----------------------
 

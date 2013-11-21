@@ -2,8 +2,33 @@ var net = require('net');
 var util = require('util');
 var fs = require('fs');
 var path = require('path');
-var crypto = require('crypto');
 var redis = require('redis');
+var walkdir = require('walkdir');
+
+// Given an object: { foo: { a: 1, b: 2 } }
+// and key: foo
+// and function: newFoo
+//
+// this function sets object.foo = newFoo, but copies the existing
+// properties onto the function so that
+// object.foo() works, but so does object.foo.a -> 1
+var replaceObjectWithFunction = function (object, key, fn) {
+    if (object[key]) {
+        Object.keys(object[key]).forEach(function (k) {
+            fn[k] = object[key][k];
+        });
+    }
+    object[key] = fn;
+};
+
+// Follows an object hierarchy down the leaves listed 
+// in the array
+var navigateObjectByArray = function (object, leaves) {
+    return leaves.reduce(function (leaf, nextLeafName) {
+        return leaf && leaf[nextLeafName];
+    }, object);
+};
+
 
 function SimpleRedis(client, options) {
     var self = this;
@@ -14,12 +39,24 @@ function SimpleRedis(client, options) {
 
     redis.RedisClient.call(this, client, options);
 
-    var files = fs.readdirSync(scriptPath);
-    var name;
-    for (var i = 0, l = files.length; i < l; i++) {
-        if (path.extname(files[i]).toLowerCase() === '.lua') {
-            name = path.basename(files[i], '.lua');
-            SimpleRedis.prototype[name] = (function (name, script) {
+    walkdir.sync(scriptPath, function (filename, stat) {
+        var relativePathParts = path.relative(scriptPath, filename).split(path.sep);
+        var name, prototype, luaFn;
+
+        relativePathParts.pop(); //Skip the last node
+        prototype = navigateObjectByArray(SimpleRedis.prototype, relativePathParts);
+
+        if (!prototype) return;
+
+        if (stat.isDirectory()) {
+            //Create empty object for directories
+            name = path.basename(filename);
+            if (!prototype[name]) prototype[name] = {};
+
+        } else if (stat.isFile() && path.extname(filename).toLowerCase() === '.lua') {
+            name = path.basename(filename, '.lua');
+
+            luaFn = (function (script) {
                 return function () {
                     var args = Array.prototype.slice.call(arguments);
                     args = [script, 0].concat(args);
@@ -28,9 +65,11 @@ function SimpleRedis(client, options) {
                     if (typeof args[args.length - 1] === 'function') callback = args.pop();
                     return self.eval(args, callback);
                 };
-            })(name, fs.readFileSync(path.join(scriptPath, files[i]), 'utf8'));
+            })(fs.readFileSync(filename, 'utf8'));
+
+            replaceObjectWithFunction(prototype, name, luaFn);
         }
-    }
+    });
 }
 
 util.inherits(SimpleRedis, redis.RedisClient);
